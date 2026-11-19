@@ -117,3 +117,28 @@ describe('catálogo: schema', () => {
     expect(Catalog.safeParse(cat).success).toBe(false);
   });
 });
+
+describe('regras de composição da campanha Verão', async () => {
+  const { compositionRuleFor } = await import('../src/index.js');
+  const verao = loadCampaign(paths, 'verao-2026');
+  it('lonas ultra-horizontais usam o bloco azul', () => {
+    for (const id of ['lona-300x70', 'lona-600x70', 'lona-800x80', 'lona-800x100']) {
+      expect(compositionRuleFor(verao.regras_composicao, id)?.fundo, id).toEqual({ cor: 'azul' });
+    }
+  });
+  it('lona 250x260 e banner seguem o padrão (foto)', () => {
+    expect(compositionRuleFor(verao.regras_composicao, 'lona-250x260')).toBeUndefined();
+    expect(compositionRuleFor(verao.regras_composicao, 'banner-100x120')).toBeUndefined();
+  });
+  it('a cor do bloco existe na paleta', () => {
+    for (const r of verao.regras_composicao) if ('cor' in r.fundo) expect(brand.cores[r.fundo.cor]).toBeTruthy();
+  });
+});
+
+describe('Verão: lona grande = bloco azul + foto no canto', () => {
+  it('foto no canto esquerdo, logo livre na direita', () => {
+    const r = loadCampaign(paths, 'verao-2026').regras_composicao[0]!;
+    expect(r.imagem_principal).toBe('canto');
+    expect(r.canto).toBe('esquerda');
+  });
+});

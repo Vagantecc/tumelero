@@ -119,3 +119,8 @@ export function gifDelaysCs(frames: { duracao_s: number }[]): number[] {
 
 const round = (n: number) => Math.round(n * 1000) / 1000;
 const trim = (n: number) => (Number.isInteger(n) ? String(n) : String(n).replace('.', ','));
+
+/** Regra de composição da campanha que vale para o formato (a primeira que casar). */
+export function compositionRuleFor<R extends { formatos: string[] }>(rules: R[], formatId: string): R | undefined {
+  return rules.find((r) => r.formatos.includes(formatId));
+}

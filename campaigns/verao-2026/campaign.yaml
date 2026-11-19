@@ -35,7 +35,17 @@ copy:
   subtitulo: "Dias de sol, casa renovada e muitas ofertas."
   cta: null
   contexto: null
+regras_composicao:
+  # Orientação do cliente (19/11): lonas maiores = bloco azul do KV + foto aplicada num canto.
+  # Seleção inicial = lonas ultra-horizontais (> 4:1). 250x260 e 420x130 seguem com a foto (a confirmar).
+  - nome: lonas grandes em bloco azul
+    formatos: [lona-300x70, lona-400x70, lona-470x90, lona-600x70, lona-800x80, lona-800x100]
+    fundo: { cor: azul }
+    imagem_principal: canto        # foto aplicada num canto do bloco azul (orientação 19/11)
+    canto: esquerda                # logo fica na ponta direita (MIV: logo H na ponta)
+    textos: [lettering, logo]      # ≤ 7 palavras de leitura principal: o subtítulo sai
+    confirmado: false
 pendencias:
   - Lettering vertical inexistente (necessário para triedro, big tower, pedágio, parallax mobile)
-  - Foto única: separar mascote/cortador do cenário (recorte) para reposicionar nos formatos extremos
+  - "Foto única — separar mascote/cortador do cenário (recorte) para reposicionar nos formatos extremos"
   - CTA e ofertas/produtos/selos não constam no KV

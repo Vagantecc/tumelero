@@ -36,6 +36,23 @@ export const Campaign = z
       cta: z.string().nullable(),
       contexto: z.string().nullable().optional(),
     }),
+    /**
+     * Regras de composição por formato: sobrescrevem o padrão do arquétipo.
+     * Ex.: lonas grandes em bloco azul sólido em vez da foto.
+     */
+    regras_composicao: z
+      .array(
+        z.object({
+          nome: z.string(),
+          formatos: z.array(z.string()).min(1),
+          fundo: z.union([z.object({ cor: z.string() }), z.object({ papel: z.string() })]),
+          imagem_principal: z.enum(['manter', 'recorte', 'canto', 'nenhuma']).default('manter'),
+          canto: z.enum(['esquerda', 'direita']).optional(),
+          textos: z.array(z.string()).optional(),
+          confirmado: z.boolean().default(false),
+        }),
+      )
+      .default([]),
     pendencias: z.array(z.string()).default([]),
   })
   .superRefine((c, ctx) => {
