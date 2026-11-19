@@ -24,8 +24,8 @@ export const Campaign = z
         elementos_apoio: z.array(z.object({ file: Asset, nome: z.string(), recortavel: z.boolean().default(true) })),
         gimmick: HV.nullable(),
         lettering: HV.extend({ by_phase: z.record(z.string(), HV).default({}) }).nullable(),
-        conceito_tipografico: z.object({ text: z.string(), style: z.string() }).nullable(),
-        logo: z.object({ auto: z.boolean(), slogan: z.boolean().default(true) }),
+        conceito_tipografico: z.object({ file: Asset.optional(), text: z.string(), style: z.string() }).nullable(),
+        logo: z.object({ auto: z.boolean(), slogan: z.boolean().default(true), kv_ref: Asset.optional() }),
         produtos: z.array(z.object({ file: Asset, nome: z.string(), preco: z.string().nullable(), condicao: z.string().nullable() })),
         selos: z.array(z.string()),
       })

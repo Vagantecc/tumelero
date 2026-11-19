@@ -10,7 +10,10 @@ pnpm desdobrador check --campaign aniversario-black-2026   # valida as configs
 pnpm desdobrador formats                                   # catálogo com escala, ppi e arquétipo
 pnpm desdobrador swatches                                  # gera os .ase da marca
 pnpm test
+pnpm ui                                                     # interface local → http://localhost:5173
 ```
+
+Para a interface mostrar o KV: `python3 tools/ingest_psd.py <kv.psd> <campanha>` (requer `pip install psd-tools`).
 
 Inputs (KV, MIV, facas) ficam fora do git, numa pasta do Google Drive. Aponte com
 `DESDOBRADOR_INPUTS` (ver `.env.example`). Os scripts Adobe rodam num Mac com

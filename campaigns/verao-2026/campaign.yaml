@@ -25,9 +25,10 @@ roles:
     horizontal: "kv.psd#3"          # "VERÃO" — vetor do Illustrator com 3D/contorno laranja
     vertical: null                  # não existe → derivar empilhado ou pedir arquivo
   conceito_tipografico:
+    file: "kv.psd#4"
     text: "Dias de sol, casa renovada e muitas ofertas."
     style: Objektiv Mk3 Black, caixa alta, tracking 25, branco
-  logo: { auto: true, slogan: false }   # cliente (19/11): não aplicar o slogan nesta campanha
+  logo: { auto: true, slogan: false, kv_ref: "kv.psd#5" }   # cliente (19/11): não aplicar o slogan nesta campanha
   produtos: []
   selos: []
 copy:
@@ -38,7 +39,7 @@ copy:
 regras_composicao:
   # Orientação do cliente (19/11): lonas maiores = bloco azul do KV + foto aplicada num canto.
   # Seleção inicial = lonas ultra-horizontais (> 4:1). 250x260 e 420x130 seguem com a foto (a confirmar).
-  - nome: lonas grandes em bloco azul
+  - nome: "lonas grandes: bloco azul + foto no canto"
     formatos: [lona-300x70, lona-400x70, lona-470x90, lona-600x70, lona-800x80, lona-800x100]
     fundo: { cor: azul }
     imagem_principal: canto        # foto aplicada num canto do bloco azul (orientação 19/11)
