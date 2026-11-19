@@ -27,7 +27,7 @@ roles:
   conceito_tipografico:
     text: "Dias de sol, casa renovada e muitas ofertas."
     style: Objektiv Mk3 Black, caixa alta, tracking 25, branco
-  logo: { auto: true }              # o KV usa o logo H branca_azul SEM slogan (kv.psd#5)
+  logo: { auto: true, slogan: false }   # cliente (19/11): não aplicar o slogan nesta campanha
   produtos: []
   selos: []
 copy:
@@ -43,9 +43,10 @@ regras_composicao:
     fundo: { cor: azul }
     imagem_principal: canto        # foto aplicada num canto do bloco azul (orientação 19/11)
     canto: esquerda                # logo fica na ponta direita (MIV: logo H na ponta)
-    foto_largura: 0.32             # fração da largura da lona (limitada a 3:1, o que a foto oferece)
+    foto_largura: 0.42             # fração da largura da lona (limitada a 3:1, o que a foto oferece)
     textos: [lettering, conceito, logo]   # conceito em texto entra por orientação do cliente (exceção à regra de 7 palavras)
-    lockup: kv                     # lettering + logo + conceito com as proporções relativas do KV-mestre
+    lockup: livre                  # VERÃO pode avançar sobre a foto (cliente, 19/11)
+    foto_origem: assets/foto_cena_expandida_adobe.png   # cena expandida para 4,7:1 com Adobe Generative Expand
     confirmado: false
 pendencias:
   - Lettering vertical inexistente (necessário para triedro, big tower, pedágio, parallax mobile)

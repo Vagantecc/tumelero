@@ -25,7 +25,7 @@ export const Campaign = z
         gimmick: HV.nullable(),
         lettering: HV.extend({ by_phase: z.record(z.string(), HV).default({}) }).nullable(),
         conceito_tipografico: z.object({ text: z.string(), style: z.string() }).nullable(),
-        logo: z.object({ auto: z.boolean() }),
+        logo: z.object({ auto: z.boolean(), slogan: z.boolean().default(true) }),
         produtos: z.array(z.object({ file: Asset, nome: z.string(), preco: z.string().nullable(), condicao: z.string().nullable() })),
         selos: z.array(z.string()),
       })
@@ -51,6 +51,7 @@ export const Campaign = z
           foto_largura: z.number().positive().max(0.6).optional(),
           textos: z.array(z.string()).optional(),
           lockup: z.enum(['kv', 'livre']).default('livre'),
+          foto_origem: z.string().optional(),
           confirmado: z.boolean().default(false),
         }),
       )
