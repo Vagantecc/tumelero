@@ -1,0 +1,41 @@
+# campaign.yaml — RASCUNHO gerado a partir da leitura do KV-mestre (inputs/kv/kv.psd).
+# Referência de asset: "kv.psd#<índice do layer>" (ordem de baixo para cima no PSD).
+# Status "rascunho" até a confirmação do mapeamento de papéis (desdobrador confirm, M2).
+slug: verao-2026
+brand: tumelero
+nome: Verão
+status: rascunho
+proprietaria: true
+phases: [verao]
+extra_colors: []
+cubo_arte: continua
+roles:
+  # Layers 0 (pixel) + 1 (smart object "Expansão generativa", PSB 4330×2436): foto única
+  # com o mascote, o cortador e o cenário. Fundo e imagem principal estão fundidos.
+  fundo:
+    file: "kv.psd#1"
+    extensible: true
+  imagem_principal:
+    file: "kv.psd#1"
+    focal_point: [0.53, 0.30]       # rosto/capacete do mascote (x, y relativos ao KV)
+  elementos_apoio:
+    - { file: "kv.psd#2", nome: faixa azul inferior (#072BAB, 100% da largura, ~27% da altura), recortavel: true }
+  gimmick: null
+  lettering:
+    horizontal: "kv.psd#3"          # "VERÃO" — vetor do Illustrator com 3D/contorno laranja
+    vertical: null                  # não existe → derivar empilhado ou pedir arquivo
+  conceito_tipografico:
+    text: "Dias de sol, casa renovada e muitas ofertas."
+    style: Objektiv Mk3 Black, caixa alta, tracking 25, branco
+  logo: { auto: true }              # o KV usa o logo H branca_azul SEM slogan (kv.psd#5)
+  produtos: []
+  selos: []
+copy:
+  titulo: "VERÃO"
+  subtitulo: "Dias de sol, casa renovada e muitas ofertas."
+  cta: null
+  contexto: null
+pendencias:
+  - Lettering vertical inexistente (necessário para triedro, big tower, pedágio, parallax mobile)
+  - Foto única: separar mascote/cortador do cenário (recorte) para reposicionar nos formatos extremos
+  - CTA e ofertas/produtos/selos não constam no KV

@@ -160,6 +160,10 @@ Ao fim de cada marco: saídas reais em `outputs/`, `pnpm test` verde, lista de p
 - **Q1 → Mac local (caminho A).** Critério: menor custo. Usa as licenças do Creative Cloud que vocês já têm. O Firefly Services exige contrato enterprise e cobra por chamada, então fica só como interface (`AppAdapter`) sem implementação. A ponte é desenhada para **qualquer Mac**: hoje o seu, amanhã outro conectado à sessão. Nada no código depende de máquina, usuário ou caminho fixo.
 - **Q2 → Inputs fora do git**, numa **pasta aberta do Google Drive**. O diretório de inputs é configurável (`DESDOBRADOR_INPUTS`, padrão `./inputs`). Os derivados pequenos (logos, facas, swatches) vão para o repositório.
 
+- **`.txt` da apresentação → dispensado.** O template do Slides ("TUMELERO-2236_ANIVERSÁRIO & BLACK", 133 slides) pode ser lido direto pela API. Ele trouxe dois achados: as tags `EM AJUSTES` e `REPROVADO` também existem; e há peças fora do catálogo (Reels 30" 1080×1920, Folheto Digital 21×29,7, Selos, Vídeo Jornada 30"/15", rádio e chat), que ficam fora do escopo gráfico até decisão em contrário.
+- **KV-mestre recebido**: campanha **Verão** (não Aniversário Black). Ver `campaigns/verao-2026/ingest-report.md`. A leitura do PSD funciona **sem Photoshop** (psd-tools, Linux). A ingestão de PSD (M2) pode rodar aqui.
+- **Mac**: `MacBook-Pro-de-Serafini` aparece no Remote Control, mas a pasta `Documents` não é oferecida a sessões na nuvem. Alternativa: rodar o Claude Code direto no Mac, no clone do repo.
+
 ### Bloqueavam o início (respondidas acima)
 - **Q1 — Onde os apps Adobe vão rodar?** (seção 2: A Mac via Remote Control / B Firefly Services / C só dry-run). Recomendo **A**. Se for A: qual Mac, com quais versões de InDesign/Illustrator/Photoshop, e a Objektiv Mk3 está ativa nele?
 - **Q2 — Inputs no git?** Os inputs somam ~26 MB (o INDD do MIV tem 13,8 MB). Proposta: `inputs/` fica no `.gitignore`; os **derivados** pequenos (logos extraídos, facas em JSON/SVG) vão para o repositório. Alternativa: Git LFS. Os KVs de cliente nunca vão para o repositório. (Também não recebi o `.txt` da apresentação nem o PNG original do Banner L, só a imagem colada.)

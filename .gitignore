@@ -4,3 +4,5 @@ node_modules/
 .env
 *.icc
 .DS_Store
+campaigns/*/assets/
+campaigns/*/_ingest/
