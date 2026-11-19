@@ -1,0 +1,6 @@
+inputs/
+outputs/
+node_modules/
+.env
+*.icc
+.DS_Store
