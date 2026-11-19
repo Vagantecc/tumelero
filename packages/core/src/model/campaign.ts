@@ -48,7 +48,9 @@ export const Campaign = z
           fundo: z.union([z.object({ cor: z.string() }), z.object({ papel: z.string() })]),
           imagem_principal: z.enum(['manter', 'recorte', 'canto', 'nenhuma']).default('manter'),
           canto: z.enum(['esquerda', 'direita']).optional(),
+          foto_largura: z.number().positive().max(0.6).optional(),
           textos: z.array(z.string()).optional(),
+          lockup: z.enum(['kv', 'livre']).default('livre'),
           confirmado: z.boolean().default(false),
         }),
       )

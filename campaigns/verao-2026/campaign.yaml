@@ -43,7 +43,9 @@ regras_composicao:
     fundo: { cor: azul }
     imagem_principal: canto        # foto aplicada num canto do bloco azul (orientação 19/11)
     canto: esquerda                # logo fica na ponta direita (MIV: logo H na ponta)
-    textos: [lettering, logo]      # ≤ 7 palavras de leitura principal: o subtítulo sai
+    foto_largura: 0.32             # fração da largura da lona (limitada a 3:1, o que a foto oferece)
+    textos: [lettering, conceito, logo]   # conceito em texto entra por orientação do cliente (exceção à regra de 7 palavras)
+    lockup: kv                     # lettering + logo + conceito com as proporções relativas do KV-mestre
     confirmado: false
 pendencias:
   - Lettering vertical inexistente (necessário para triedro, big tower, pedágio, parallax mobile)
