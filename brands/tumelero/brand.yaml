@@ -1,0 +1,167 @@
+# brand.yaml — Tumelero
+# Fonte: MIV_Tumelero_2026_-_v4.pdf (publicado 11/11/2026). Campos marcados `pendente: M1b`
+# serão preenchidos pelo script de extração (brand-extract.jsx) rodando no InDesign.
+slug: tumelero
+nome: Tumelero
+fonte_miv: MIV_Tumelero_2026_-_v4.pdf
+site: www.tumelero.com.br
+prefixo_arquivo: TUM
+
+cores:
+  azul:
+    pantone: PANTONE 2145 C
+    cmyk: [100, 89, 0, 19]
+    rgb: [7, 43, 171]
+    hex: "#072BAB"
+    papel: predominante, institucional
+    proporcao: 60
+  laranja:
+    pantone: PANTONE 152 C
+    cmyk: [7, 67, 100, 0]
+    rgb: [229, 121, 63]      # MIV PDF p.13. O INDD tem 229-120-63 (divergência registrada).
+    hex: "#E5793F"
+    papel: destaque e ação
+    proporcao: 30
+  branco:
+    pantone: null
+    cmyk: [0, 0, 0, 0]
+    rgb: [255, 255, 255]
+    hex: "#FFFFFF"
+    papel: respiro
+    proporcao: 10
+  # Cores técnicas usadas pelas variações positiva/negativa do logo (MIV p.11).
+  preto:
+    pantone: null
+    cmyk: [0, 0, 0, 100]
+    rgb: [0, 0, 0]
+    hex: "#000000"
+    papel: técnica (logo positivo, texto pequeno)
+    proporcao: 0
+
+regras_cor:
+  proporcao_padrao: { azul: 60, laranja: 30, branco: 10 }
+  campanha_proprietaria_dominante: azul       # MIV p.22
+  tolerancia_delta_e: 2
+  preto_texto_pequeno: [0, 0, 0, 100]
+  preto_rico_fundo: [60, 40, 40, 100]
+  divergencias:
+    - campo: cores.laranja.rgb
+      pdf: [229, 121, 63]
+      indd: [229, 120, 63]
+      adotado: [229, 121, 63]
+      motivo: o documento publicado (PDF) prevalece sobre o editável
+
+tipografia:
+  familia: Objektiv Mk3
+  adobe_fonts: https://fonts.adobe.com/fonts/objektiv
+  estilos_permitidos:
+    - Regular
+    - Italic
+    - Medium
+    - Medium Italic
+    - Bold
+    - Bold Italic
+    - XBold
+    - XBold Italic
+    - Black
+    - Black Italic
+  nome_campanha: { estilo: Black, caixa: alta }
+  hierarquia: [titulo, preco, condicao_pagamento]
+  preco:
+    # "R$" pequeno + inteiro grande + ",90" sobrescrito + "à vista" pequeno (MIV p.16)
+    moeda: { escala: 0.35, estilo: Bold }
+    inteiro: { escala: 1.0, estilo: Black }
+    centavos: { escala: 0.4, estilo: Black, posicao: sobrescrito }
+    condicao: { escala: 0.3, estilo: Medium, texto: "à vista" }
+  percentual:
+    numero: { escala: 1.0, estilo: Black }
+    simbolo: { escala: 0.5, estilo: Black, texto: "%" }
+    sufixo: { escala: 0.35, estilo: Bold, texto: "off" }
+  # Fontes que aparecem no INDD do MIV só na diagramação do guia. Proibidas nas peças.
+  fontes_so_no_guia: [Objektiv Mk1, Cabinet Grotesk, Poppins, Raleway, Open Sans, Open Sauce One, Minion Pro]
+
+logo:
+  observacao: >
+    O lettering do logo é baseado na Objektiv Mk3, mas com tamanhos alterados e cantos
+    arredondados (MIV p.7). O "t" da casa é diferente do "t" do lettering e a casa não tem
+    inclinação. Nunca recompor com texto: usar sempre o vetor oficial.
+  versao_principal: horizontal
+  slogan:
+    texto: Ninguém facilita tanto
+    regra: acompanha o logo, exceto se a frase já estiver na peça
+    # Detecção da frase na peça: comparação sem acento, sem caixa e sem pontuação.
+  # Variações de cor (MIV p.11). Valem para H e V, com e sem slogan.
+  variantes_cor:
+    colorida:       { lettering: azul,   casa: laranja, t_casa: branco,  slogan: azul,   fundos: [branco] }
+    branca_azul:    { lettering: branco, casa: laranja, t_casa: branco,  slogan: branco, fundos: [azul] }
+    branca_laranja: { lettering: branco, casa: azul,    t_casa: branco,  slogan: branco, fundos: [laranja] }
+    positiva:       { lettering: preto,  casa: preto,   t_casa: branco,  slogan: preto,  fundos: [branco] }
+    negativa:       { lettering: branco, casa: branco,  t_casa: preto,   slogan: branco, fundos: [preto] }
+  escolha_cor:
+    # Ordem: cor de fundo mais próxima (ΔE2000) entre as cores-chave; se nenhuma estiver a
+    # ΔE <= limite, decide pela luminância (claro → colorida, escuro → negativa).
+    delta_e_limite: 15
+    prioridade_fundo_claro: [colorida, positiva]
+    prioridade_fundo_escuro: [negativa]
+    contraste_minimo: 3.0
+  por_arquetipo:
+    ultra-horizontal: { permitidas: [horizontal] }
+    horizontal:       { permitidas: [horizontal] }
+    quase-quadrado:   { permitidas: [horizontal] }            # vertical proibida em 1:1
+    vertical:         { permitidas: [horizontal, vertical], preferida: horizontal }
+    ultravertical:    { permitidas: [horizontal, vertical], preferida: horizontal, vertical_se: horizontal_abaixo_minimo }
+  area_seguranca:
+    unidade: casa            # X = altura da casa do símbolo, na escala do logo (MIV p.8)
+    x_sobre_altura_logo_h: null   # pendente: M1b
+    x_sobre_altura_logo_v: null   # pendente: M1b
+  tamanho_minimo:
+    # Sugestão provisória até a medição no M1b (largura do logo H sem slogan).
+    horizontal: { impresso_mm: 30, digital_px: 80 }
+    vertical:   { impresso_mm: 18, digital_px: 48 }
+    fonte: sugerido_provisorio
+  proporcoes:
+    horizontal: null   # largura/altura — pendente: M1b
+    vertical: null     # pendente: M1b
+  # Arquivos oficiais extraídos do MIV.indd. Preenchido por `desdobrador brand-extract`.
+  # Nome: logo_<h|v>_<variante>[_slogan]_<cmyk|rgb>.<pdf|svg|ai>
+  arquivos: []
+  paginas_miv: { logo: 6, construcao: 7, area_seguranca: 8, slogan: 9, vertical: 10, aplicacoes: 11, icones: 18, casa: 19 }
+
+elementos:
+  icones:
+    estilo: sólido, cor única
+    cores_permitidas: [preto, branco, azul, laranja]
+    arquivos: []   # pendente: M1b (MIV p.18)
+  casa:
+    descricao: forma derivada do símbolo; pode ser ampliada, recortada ou sobreposta como fundo e divisão de área
+    arquivos: []   # pendente: M1b (MIV p.19)
+
+fotografia:
+  diretrizes:
+    - contexto real de uso
+    - ação em foco (mãos, ferramentas, aplicação)
+    - textura e detalhe do produto
+    - nada superproduzido
+  nao_usar: fotos ilustrativas do MIV (links quebrados, máquina de outra pessoa)
+
+linguagem:
+  tratamento: tu
+  pronomes_preferidos: [tu, tua, teu, tuas, teus, contigo]
+  pronomes_alerta: [você, vocês, seu, sua, seus, suas]
+  termos_proprietarios: [obra, reforma, construção, projeto, tua, teu, tu]
+  palavras_chave:
+    essencia: [Facilidade, Praticidade, Simplicidade, Agilidade, Solução]
+    relacao: [Proximidade, Parceria, Confiança, Acessibilidade, Atendimento]
+    universo: [Obra, Reforma, Construção, Projeto, Transformação]
+  assinaturas:
+    - "A Tumelero facilita a tua obra."
+    - "A Tumelero facilita a tua casa."
+    - "A Tumelero facilita a tua vida."
+  frases_proibidas:
+    - "Aqui você encontra o que precisa"
+    - "Ofertas arrasadoras para você"
+    - "Versatilidade e ergonomia para cuidar do seu jardim"
+  exemplos_bons:
+    - "A gente facilita a tua obra do início ao fim."
+    - "Tudo para cortar, podar e manter o teu jardim."
+    - "Economia que cabe na tua reforma."

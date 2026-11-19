@@ -156,7 +156,11 @@ Ao fim de cada marco: saídas reais em `outputs/`, `pnpm test` verde, lista de p
 
 ## 8. Dúvidas abertas
 
-### Bloqueiam o início (preciso antes do M1)
+### Decididas (19/11/2026)
+- **Q1 → Mac local (caminho A).** Critério: menor custo. Usa as licenças do Creative Cloud que vocês já têm. O Firefly Services exige contrato enterprise e cobra por chamada, então fica só como interface (`AppAdapter`) sem implementação. A ponte é desenhada para **qualquer Mac**: hoje o seu, amanhã outro conectado à sessão. Nada no código depende de máquina, usuário ou caminho fixo.
+- **Q2 → Inputs fora do git**, numa **pasta aberta do Google Drive**. O diretório de inputs é configurável (`DESDOBRADOR_INPUTS`, padrão `./inputs`). Os derivados pequenos (logos, facas, swatches) vão para o repositório.
+
+### Bloqueavam o início (respondidas acima)
 - **Q1 — Onde os apps Adobe vão rodar?** (seção 2: A Mac via Remote Control / B Firefly Services / C só dry-run). Recomendo **A**. Se for A: qual Mac, com quais versões de InDesign/Illustrator/Photoshop, e a Objektiv Mk3 está ativa nele?
 - **Q2 — Inputs no git?** Os inputs somam ~26 MB (o INDD do MIV tem 13,8 MB). Proposta: `inputs/` fica no `.gitignore`; os **derivados** pequenos (logos extraídos, facas em JSON/SVG) vão para o repositório. Alternativa: Git LFS. Os KVs de cliente nunca vão para o repositório. (Também não recebi o `.txt` da apresentação nem o PNG original do Banner L, só a imagem colada.)
 

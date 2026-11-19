@@ -1,0 +1,236 @@
+# catalog.yaml — catálogo de formatos (seções 5.1 e 5.2 do briefing)
+# Medidas sempre no TAMANHO FINAL. A escala do documento (1:1 ou 1:10) é derivada da
+# regra `escala` abaixo e aplicada só na construção do arquivo.
+# `distancia_leitura_m`: padrões provisórios (pendente Q4 — medidas reais nas lojas).
+
+regras:
+  escala:
+    reduzida: 0.1                 # 1:10
+    se_algum_lado_cm_maior_ou_igual: 250
+    sufixo: _E1-10
+  ppi:                            # ppi efetivo dos links no tamanho FINAL
+    pequeno: { minimo: 150, ideal: 200 }   # até ~1 m²: banner, pórtico, móbile, cubo, triedro
+    medio:   { minimo: 100, ideal: 150 }   # lonas e adesivo até 4 m
+    grande:  { minimo: 72,  ideal: 100 }   # acima de 4 m
+  legibilidade:
+    caixa_alta_mm_por_10m: 25
+    apoio_fracao: 0.6
+    palavras_max_lona: 7
+    digital_texto_min_px: 10
+  digital:
+    ppi_metadado: 300
+    supersampling: 3
+  previa:
+    max_bytes: 31457280          # 30 MB
+    min_lado_maior_px: 2000
+  gif:
+    duracao_total_s: 10
+    loop: 0                       # infinito
+    max_bytes: 153600             # 150 KB
+
+grupos:
+  pdv:          { secao_apresentacao: PDV }
+  folheto:      { secao_apresentacao: FOLHETO }
+  banners:      { secao_apresentacao: BANNERS (DIGITAIS) }
+  transmissao:  { secao_apresentacao: PEÇAS TRANSMISSÃO }
+  pedagio:      { secao_apresentacao: PEDÁGIO }
+  facebook:     { secao_apresentacao: CAPA FACEBOOK }
+
+# ---------- padrões reutilizáveis ----------
+_impresso: &impresso
+  grupo: pdv
+  unidade: cm
+  colorspace: cmyk
+  app: indesign
+  saidas: [pdf-x1a, pacote, previa-png]
+  faces: 1
+
+_lona: &lona
+  <<: *impresso
+  sangria_mm: 30
+  margem_seguranca_mm: 50        # sangria + 20 mm
+  ppi_tier: medio
+  distancia_leitura_m: { min: 8, max: 15 }
+  palavras_max: 7
+
+_gif: &gif
+  grupo: banners
+  unidade: px
+  colorspace: rgb
+  app: photoshop
+  saidas: [gif]
+  limite_bytes: 153600
+  frames:
+    - { id: F1, conteudo: conceito,        duracao_s: 4 }
+    - { id: F2, conteudo: oferta_produto,  duracao_s: 3 }
+    - { id: F3, conteudo: marca_cta,       duracao_s: 3 }
+
+formatos:
+  # ===================== 5.1 IMPRESSOS =====================
+  - id: banner-100x120
+    nome_apresentacao: Banner
+    <<: *impresso
+    medida: { w: 100, h: 120 }
+    faces: 2
+    sangria_mm: 5
+    margem_seguranca_mm: 10
+    ppi_tier: pequeno
+    distancia_leitura_m: { min: 3, max: 3 }
+
+  - { id: lona-250x260, nome_apresentacao: Lona, <<: *lona, medida: { w: 250, h: 260 } }
+  - { id: lona-300x70,  nome_apresentacao: Lona, <<: *lona, medida: { w: 300, h: 70 } }
+  - { id: lona-400x70,  nome_apresentacao: Lona, <<: *lona, medida: { w: 400, h: 70 } }
+  - { id: lona-420x130, nome_apresentacao: Lona, <<: *lona, medida: { w: 420, h: 130 }, ppi_tier: grande }
+  - { id: lona-470x90,  nome_apresentacao: Lona, <<: *lona, medida: { w: 470, h: 90 },  ppi_tier: grande }
+  - { id: lona-600x70,  nome_apresentacao: Lona, <<: *lona, medida: { w: 600, h: 70 },  ppi_tier: grande }
+  - { id: lona-800x80,  nome_apresentacao: Lona, <<: *lona, medida: { w: 800, h: 80 },  ppi_tier: grande }
+  - { id: lona-800x100, nome_apresentacao: Lona, <<: *lona, medida: { w: 800, h: 100 }, ppi_tier: grande }
+
+  - id: portico-130x50
+    nome_apresentacao: Pórtico
+    <<: *impresso
+    medida: { w: 130, h: 50 }
+    faces: 2
+    sangria_mm: 5
+    margem_seguranca_mm: 10
+    ppi_tier: pequeno
+    distancia_leitura_m: { min: 3, max: 3 }
+    visto_dos_dois_lados: true
+
+  - id: adesivo-vitrine-700x150
+    nome_apresentacao: Adesivo vitrine
+    <<: *impresso
+    medida: { w: 700, h: 150 }
+    sangria_mm: 10
+    margem_seguranca_mm: 10
+    ppi_tier: grande
+    distancia_leitura_m: { min: 5, max: 5 }
+    espelhar: false               # aplicado pelo lado de fora do vidro
+    observacao: aplicado pelo lado de fora do vidro — leitura normal, sem espelhar
+
+  - id: mobile-50x50
+    nome_apresentacao: Móbile
+    <<: *impresso
+    medida: { w: 50, h: 50 }
+    faces: 2
+    sangria_mm: 5
+    margem_seguranca_mm: 10
+    ppi_tier: pequeno
+    distancia_leitura_m: { min: 2, max: 4 }
+    faca: { tipo: especial, origem: [gimmick, lettering], offset_mm: 4, angulo_min_graus: 30 }
+    visto_dos_dois_lados: true
+
+  - id: cubo-40
+    nome_apresentacao: Cubo
+    <<: *impresso
+    medida: { w: 40, h: 40 }      # por face
+    faces: 1
+    partes: 4
+    sangria_mm: 5
+    margem_seguranca_mm: 10
+    margem_dobra_mm: 15
+    ppi_tier: pequeno
+    distancia_leitura_m: { min: 2, max: 4 }
+    faca: { tipo: gabarito, id: cubo }
+
+  - id: triedro-40x160
+    nome_apresentacao: Triedro
+    <<: *impresso
+    medida: { w: 40, h: 160 }     # por face (40×40×40 de base, 160 de altura)
+    faces: 1
+    partes: 3
+    sangria_mm: 5
+    margem_seguranca_mm: 10
+    margem_dobra_mm: 15
+    ppi_tier: pequeno
+    distancia_leitura_m: { min: 2, max: 4 }
+    faca: { tipo: gabarito, id: triedro }
+
+  # ===================== 5.2 DIGITAIS =====================
+  - id: a4-digital
+    nome_apresentacao: Folha A4 digital
+    grupo: folheto                # confirmar seção com o .txt da apresentação
+    unidade: px
+    medida: { w: 2480, h: 3508 }
+    colorspace: rgb
+    app: photoshop
+    saidas: [png, jpg]
+    area_conteudo: { x: 0, y: 0, w: 2480, h: 591, descricao: cabeçalho de 5 cm (210×50 mm a 300 ppi) }
+
+  - id: banner-rodape
+    nome_apresentacao: Banner rodapé
+    grupo: transmissao            # confirmar seção com o .txt da apresentação
+    unidade: px
+    medida: { w: 900, h: 64 }
+    colorspace: rgb
+    app: photoshop
+    saidas: [png]
+    limite_bytes: 5242880
+
+  - id: banner-l
+    nome_apresentacao: Banner formato L
+    grupo: transmissao
+    unidade: px
+    medida: { w: 1920, h: 1080 }
+    colorspace: rgb
+    app: photoshop
+    saidas: [png-alfa]
+    limite_bytes: 5242880
+    arquetipo: banner-l           # template especial, não deriva da proporção
+    janela_transparente: { x: 0, y: 0, w: 1378, h: 773 }
+    zonas:
+      coluna_direita: { x: 1378, y: 0, w: 542, h: 773, conteudo: [foto, qr_cta] }
+      faixa_inferior: { x: 0, y: 773, w: 1920, h: 307, conteudo: [marca, titulo, subtitulo, assinaturas] }
+
+  - id: capa-facebook
+    nome_apresentacao: Capa Facebook
+    grupo: facebook
+    unidade: px
+    medida: { w: 820, h: 360 }
+    colorspace: rgb
+    app: photoshop
+    saidas: [jpg, png]
+    area_segura: { x: 90, y: 0, w: 640, h: 360, descricao: área visível no mobile }
+
+  - { id: ret-medio,         nome_apresentacao: Retângulo médio, <<: *gif, medida: { w: 300,  h: 250 } }
+  - { id: superbanner-d,     nome_apresentacao: Superbanner,     <<: *gif, medida: { w: 728,  h: 90 } }
+  - { id: superbanner-m,     nome_apresentacao: Superbanner,     <<: *gif, medida: { w: 320,  h: 50 } }
+  - { id: megabanner-d,      nome_apresentacao: Megabanner,      <<: *gif, medida: { w: 949,  h: 90 } }
+  - { id: megabanner-m,      nome_apresentacao: Megabanner,      <<: *gif, medida: { w: 320,  h: 50 } }
+  - { id: billboard-d,       nome_apresentacao: Billboard,       <<: *gif, medida: { w: 970,  h: 250 } }
+  - { id: billboard-m,       nome_apresentacao: Billboard,       <<: *gif, medida: { w: 320,  h: 100 } }
+  - { id: mega-billboard-d,  nome_apresentacao: Mega Billboard,  <<: *gif, medida: { w: 1200, h: 250 } }
+  - { id: mega-billboard-m,  nome_apresentacao: Mega Billboard,  <<: *gif, medida: { w: 320,  h: 100 } }
+  - { id: big-tower,         nome_apresentacao: Big Tower,       <<: *gif, medida: { w: 300,  h: 600 } }
+  - { id: sticky-d,          nome_apresentacao: Sticky,          <<: *gif, medida: { w: 1200, h: 150 } }
+  - { id: sticky-m,          nome_apresentacao: Sticky,          <<: *gif, medida: { w: 320,  h: 100 } }
+  - { id: parallax-d,        nome_apresentacao: Parallax,        <<: *gif, medida: { w: 1200, h: 400 } }
+  - { id: parallax-m,        nome_apresentacao: Parallax,        <<: *gif, medida: { w: 320,  h: 480 } }
+  - id: parallax-in-text
+    nome_apresentacao: Parallax in Text
+    <<: *gif
+    medida: { w: 700, h: 700 }
+    area_conteudo: { x: 0, y: 175, w: 700, h: 350, descricao: área útil — conteúdo crítico só aqui, posição vertical centralizada (a confirmar) }
+
+  # ===================== MOTION PEDÁGIO =====================
+  - id: pedagio
+    nome_apresentacao: Motion pedágio
+    grupo: pedagio
+    unidade: px
+    medida: { w: 208, h: 416 }
+    colorspace: rgb
+    app: photoshop
+    saidas: [mp4, png-telas]
+    video:
+      codec: h264
+      perfil: high
+      fps: 30
+      bitrate_kbps: 8000
+      dpi: 72
+      pix_fmt: yuv420p
+      transicao: corte_seco
+      telas:
+        - { id: T1, duracao_s: 4 }
+        - { id: T2, duracao_s: 3 }
+        - { id: T3, duracao_s: 3 }
+    variants: [tumelero, sika, hydronorth, garthen, lynus]

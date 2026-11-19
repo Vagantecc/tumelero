@@ -1,0 +1,8 @@
+{
+  "name": "@desdobrador/cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": { "desdobrador": "./src/index.ts" },
+  "dependencies": { "@desdobrador/core": "workspace:*", "commander": "^14.0.0" }
+}

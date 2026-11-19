@@ -1,0 +1,32 @@
+# campaign.yaml — RASCUNHO. Os papéis do sistema visual serão preenchidos pela ingestão
+# do KV-mestre (M2). Campos null = ainda não recebido; nada aqui é inventado.
+slug: aniversario-black-2026
+brand: tumelero
+nome: Aniversário Black
+status: rascunho
+proprietaria: true
+phases: [aniversario, antecipa, black, prorrogada]
+dominancia_por_fase:
+  black: preto-black          # na fase BLACK o preto é protagonista (validador 60/30/10)
+extra_colors:
+  - { name: preto-black, cmyk: [0, 0, 0, 100], rgb: [0, 0, 0], phases: [black] }
+cubo_arte: continua
+roles:
+  fundo: null
+  imagem_principal: null
+  elementos_apoio: []
+  gimmick: null
+  lettering: null
+  conceito_tipografico: null
+  logo: { auto: true }
+  produtos: []
+  selos: []
+copy:
+  titulo: null
+  subtitulo: null
+  cta: "Passe nas lojas ou acesse tumelero.com.br"
+  contexto: null
+pendencias:
+  - KV-mestre (.psd/.ai/.indd) + assets — necessário para o M2
+  - TUMELERO-2236_ANIVERSARIO_BLACK.txt — estrutura de peças e status da apresentação
+  - Preto rico da fase BLACK para fundos (padrão do brand.yaml é 60/40/40/100) — confirmar
