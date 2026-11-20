@@ -10,6 +10,8 @@ import {
   presentationTitle,
   printGeometry,
   requiredPixels,
+  requiredPixelsDoc,
+  diretrizFor,
   requiredPpi,
   resolvePaths,
 } from '../src/index.js';
@@ -47,20 +49,9 @@ describe('arquétipos (seção 6.1)', () => {
   });
 });
 
-describe('escala 1:10 e geometria', () => {
-  it('1:10 para qualquer lado ≥ 2,5 m', () => {
-    expect(docScale(f('lona-250x260'), cat)).toBe(0.1);
-    expect(docScale(f('lona-300x70'), cat)).toBe(0.1);
-    expect(docScale(f('adesivo-vitrine-700x150'), cat)).toBe(0.1);
-    expect(docScale(f('banner-100x120'), cat)).toBe(1);
-    expect(docScale(f('triedro-40x160'), cat)).toBe(1);
-    expect(docScale(f('ret-medio'), cat)).toBe(1);
-  });
-
-  it('todas as lonas e o adesivo saem em 1:10', () => {
-    for (const x of cat.formatos.filter((y) => y.id.startsWith('lona-') || y.id.startsWith('adesivo'))) {
-      expect(docScale(x, cat), x.id).toBe(0.1);
-    }
+describe('escala 1:10 e geometria (cliente 20/11: todo impresso em 1:10)', () => {
+  it('todo impresso sai em 1:10; digitais em 1:1', () => {
+    for (const x of cat.formatos) expect(docScale(x, cat), x.id).toBe(x.unidade === 'px' ? 1 : 0.1);
   });
 
   it('sangria e margens também dividem por 10', () => {
@@ -69,18 +60,32 @@ describe('escala 1:10 e geometria', () => {
     expect(g.bleedDocMm).toBe(3);
     expect(g.safeDocMm).toBe(5);
     const b = printGeometry(f('banner-100x120'), cat);
-    expect(b.docMm).toEqual({ w: 1000, h: 1200 });
-    expect(b.bleedDocMm).toBe(5);
+    expect(b.docMm).toEqual({ w: 100, h: 120 });
+    expect(b.bleedDocMm).toBe(0.5);
   });
 
-  it('ppi exigido no documento é 10× em 1:10', () => {
-    expect(requiredPpi(f('lona-300x70'), cat)).toEqual({ finalMin: 100, finalIdeal: 150, docMin: 1000, docIdeal: 1500 });
-    expect(requiredPpi(f('lona-800x80'), cat)?.docMin).toBe(720);
-    expect(requiredPpi(f('banner-100x120'), cat)?.docMin).toBe(150);
+  it('ppi: 300 no documento = 30 no final; alerta contra a referência final', () => {
+    const lona = requiredPpi(f('lona-800x80'), cat)!;
+    expect(lona).toMatchObject({ docMin: 300, docIdeal: 300, finalMin: 30, finalIdeal: 30 });
+    expect(lona.referenciaFinal).toEqual({ minimo: 72, ideal: 100 });
+    expect(lona.abaixoReferencia).toBe(false); // lona vista a 8–15 m: sem alerta
+    expect(requiredPpi(f('banner-100x120'), cat)?.abaixoReferencia).toBe(true);
+    expect(requiredPpi(f('ret-medio'), cat)).toBeNull();
   });
 
-  it('pixels mínimos para links_faltando.md', () => {
+  it('pixels de link a 300 ppi no documento 1:10', () => {
     expect(requiredPixels({ w: 254, h: 127 }, 100)).toEqual({ w: 10000, h: 5000 });
+    // banner 101×121 cm final → 10,1×12,1 cm no doc → 300 ppi
+    expect(requiredPixelsDoc({ w: 101, h: 121 }, 0.1, 300)).toEqual({ w: 1193, h: 1430 });
+  });
+
+  it('peça-diretriz por arquétipo', () => {
+    expect(diretrizFor(f('lona-300x70'), cat)).toBe('lona-800x80');
+    expect(diretrizFor(f('portico-130x50'), cat)).toBe('lona-420x130');
+    expect(diretrizFor(f('mobile-50x50'), cat)).toBe('banner-100x120');
+    expect(diretrizFor(f('triedro-40x160'), cat)).toBe('big-tower');
+    expect(diretrizFor(f('banner-l'), cat)).toBe('lona-420x130');
+    expect(new Set(Object.values(cat.diretrizes)).size).toBe(4);
   });
 });
 
@@ -99,7 +104,7 @@ describe('nomenclatura (seção 7.4) e apresentação', () => {
     );
     expect(
       outputName({ prefix: 'TUM', campaign: 'aniversario-black-2026', phase: 'black', format: f('banner-100x120'), catalog: cat, face: 'V', version: 3, ext: 'png' }),
-    ).toBe('TUM_ANIVERSARIO-BLACK-2026_BLACK_BANNER_100x120cm_V_v03.png');
+    ).toBe('TUM_ANIVERSARIO-BLACK-2026_BLACK_BANNER_100x120cm_V_E1-10_v03.png');
   });
 
   it('título do slide', () => {
@@ -141,5 +146,53 @@ describe('catálogo: invariantes', () => {
 
   it('adesivo vitrine nunca espelhado', () => {
     expect(f('adesivo-vitrine-700x150').espelhar).toBe(false);
+  });
+});
+
+describe('cadastro de tamanhos e campanhas', async () => {
+  const { mkdtempSync, cpSync, readFileSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const { join } = await import('node:path');
+  const { addFormat, createCampaign, loadCampaign } = await import('../src/index.js');
+  const root = new URL('../../..', import.meta.url).pathname;
+  const sandbox = () => {
+    const d = mkdtempSync(join(tmpdir(), 'desdobrador-'));
+    cpSync(join(root, 'formats'), join(d, 'formats'), { recursive: true });
+    cpSync(join(root, 'brands'), join(d, 'brands'), { recursive: true });
+    return resolvePaths(d);
+  };
+
+  it('novo tamanho herda specs da base, preserva comentários e é validado', () => {
+    const p = sandbox();
+    const nf = addFormat(p, { base: 'lona-300x70', nome_apresentacao: 'Lona', w: 500, h: 60 });
+    expect(nf.id).toBe('lona-500x60');
+    expect(nf.sangria_mm).toBe(30);
+    const c = loadCatalog(p);
+    const got = c.formatos.find((x) => x.id === 'lona-500x60')!;
+    expect(archetypeFor(got)).toBe('ultra-horizontal');
+    expect(docScale(got, c)).toBe(0.1);
+    expect(readFileSync(join(p.root, 'formats', 'catalog.yaml'), 'utf8')).toContain('# Peças-diretriz');
+  });
+
+  it('recusa id duplicado e base inexistente', () => {
+    const p = sandbox();
+    expect(() => addFormat(p, { base: 'lona-300x70', nome_apresentacao: 'Lona', w: 300, h: 70 })).toThrow(/já existe/);
+    expect(() => addFormat(p, { base: 'nao-existe', nome_apresentacao: 'X', w: 1, h: 1 })).toThrow(/não existe/);
+  });
+
+  it('novo tamanho digital a partir de um GIF', () => {
+    const p = sandbox();
+    const nf = addFormat(p, { base: 'ret-medio', nome_apresentacao: 'Half Page', w: 300, h: 600, id: 'half-page' });
+    expect(nf).toMatchObject({ id: 'half-page', unidade: 'px', limite_bytes: 153600 });
+  });
+
+  it('nova campanha cria rascunho válido e não sobrescreve', () => {
+    const p = sandbox();
+    const c = createCampaign(p, { nome: 'Inverno Tumelero', brand: 'tumelero', phases: ['Lançamento', 'Saldão'] });
+    expect(c.slug).toBe('inverno-tumelero');
+    expect(c.phases).toEqual(['lancamento', 'saldao']);
+    expect(loadCampaign(p, 'inverno-tumelero').status).toBe('rascunho');
+    expect(() => createCampaign(p, { nome: 'Inverno Tumelero', brand: 'tumelero' })).toThrow(/já existe/);
+    expect(() => createCampaign(p, { nome: 'X', brand: 'marca-inexistente' })).toThrow();
   });
 });

@@ -90,7 +90,8 @@ export const Format = z
 export const Catalog = z
   .object({
     regras: z.object({
-      escala: z.object({ reduzida: z.number().positive().max(1), se_algum_lado_cm_maior_ou_igual: z.number().positive(), sufixo: z.string() }),
+      escala: z.object({ reduzida: z.number().positive().max(1), se_algum_lado_cm_maior_ou_igual: z.number().min(0), sufixo: z.string() }),
+      ppi_documento: z.object({ minimo: z.number().positive(), ideal: z.number().positive() }).optional(),
       ppi: z.record(PpiTier, z.object({ minimo: z.number().positive(), ideal: z.number().positive() })),
       legibilidade: z.object({
         caixa_alta_mm_por_10m: z.number().positive(),
@@ -102,10 +103,15 @@ export const Catalog = z
       previa: z.object({ max_bytes: z.number().int().positive(), min_lado_maior_px: z.number().int().positive() }),
       gif: z.object({ duracao_total_s: z.number().positive(), loop: z.number().int().min(0), max_bytes: z.number().int().positive() }),
     }),
+    diretrizes: z.partialRecord(z.union([Archetype, z.literal('banner-l')]), z.string()).default({}),
     grupos: z.record(z.string(), z.object({ secao_apresentacao: z.string() })),
     formatos: z.array(Format).min(1),
   })
   .superRefine((c, ctx) => {
+    const ids = new Set(c.formatos.map((f) => f.id));
+    for (const [a, id] of Object.entries(c.diretrizes)) {
+      if (!ids.has(id)) ctx.addIssue({ code: 'custom', message: `diretriz "${id}" não existe no catálogo`, path: ['diretrizes', a] });
+    }
     const seen = new Set<string>();
     c.formatos.forEach((f, i) => {
       if (seen.has(f.id)) ctx.addIssue({ code: 'custom', message: `id duplicado: ${f.id}`, path: ['formatos', i, 'id'] });

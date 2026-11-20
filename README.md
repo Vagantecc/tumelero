@@ -9,6 +9,8 @@ pnpm install
 pnpm desdobrador check --campaign aniversario-black-2026   # valida as configs
 pnpm desdobrador formats                                   # catálogo com escala, ppi e arquétipo
 pnpm desdobrador swatches                                  # gera os .ase da marca
+pnpm desdobrador formato-novo --base lona-300x70 --nome Lona --largura 500 --altura 60
+pnpm desdobrador campanha-nova --nome "Inverno" --fases "lancamento,saldao"
 pnpm test
 pnpm ui                                                     # interface local → http://localhost:5173
 ```

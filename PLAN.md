@@ -164,6 +164,10 @@ Ao fim de cada marco: saídas reais em `outputs/`, `pnpm test` verde, lista de p
 - **KV-mestre recebido**: campanha **Verão** (não Aniversário Black). Ver `campaigns/verao-2026/ingest-report.md`. A leitura do PSD funciona **sem Photoshop** (psd-tools, Linux). A ingestão de PSD (M2) pode rodar aqui.
 - **Mac**: `MacBook-Pro-de-Serafini` aparece no Remote Control, mas a pasta `Documents` não é oferecida a sessões na nuvem. Alternativa: rodar o Claude Code direto no Mac, no clone do repo.
 
+- **Escala 1:10 em todos os impressos (20/11)**, com links a **300 ppi no documento** (30 ppi final). O tier de ppi final virou referência: só gera ALERTA em peças vistas a < 5 m.
+- **Peças-diretriz (20/11)**: 4 composições de referência (lona 800×80, lona 420×130, banner 100×120, big tower) em vez de diagramar 34 peças. Cada formato deriva da diretriz do seu arquétipo (`diretrizes` no catalog.yaml).
+- **Cadastro (20/11)**: novos tamanhos (`desdobrador formato-novo`, a partir de um formato-base) e novas campanhas (`desdobrador campanha-nova`), também pela UI.
+
 ### Bloqueavam o início (respondidas acima)
 - **Q1 — Onde os apps Adobe vão rodar?** (seção 2: A Mac via Remote Control / B Firefly Services / C só dry-run). Recomendo **A**. Se for A: qual Mac, com quais versões de InDesign/Illustrator/Photoshop, e a Objektiv Mk3 está ativa nele?
 - **Q2 — Inputs no git?** Os inputs somam ~26 MB (o INDD do MIV tem 13,8 MB). Proposta: `inputs/` fica no `.gitignore`; os **derivados** pequenos (logos extraídos, facas em JSON/SVG) vão para o repositório. Alternativa: Git LFS. Os KVs de cliente nunca vão para o repositório. (Também não recebi o `.txt` da apresentação nem o PNG original do Banner L, só a imagem colada.)

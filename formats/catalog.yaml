@@ -1,14 +1,19 @@
 # catalog.yaml — catálogo de formatos (seções 5.1 e 5.2 do briefing)
-# Medidas sempre no TAMANHO FINAL. A escala do documento (1:1 ou 1:10) é derivada da
-# regra `escala` abaixo e aplicada só na construção do arquivo.
+# Medidas sempre no TAMANHO FINAL. A escala do documento é derivada da regra `escala`
+# abaixo e aplicada só na construção do arquivo.
+# Decisão do cliente (20/11): TODO impresso sai em 1:10, com links a 300 ppi no documento.
 # `distancia_leitura_m`: padrões provisórios (pendente Q4 — medidas reais nas lojas).
 
 regras:
   escala:
     reduzida: 0.1                 # 1:10
-    se_algum_lado_cm_maior_ou_igual: 250
+    se_algum_lado_cm_maior_ou_igual: 0   # 0 = todos os impressos em 1:10 (antes: 250)
     sufixo: _E1-10
-  ppi:                            # ppi efetivo dos links no tamanho FINAL
+  # Regra principal: ppi efetivo MEDIDO NO DOCUMENTO (1:10). 300 ppi no doc = 30 ppi no final.
+  ppi_documento: { minimo: 300, ideal: 300 }
+  # Referência no tamanho final: só gera ALERTA (não bloqueia) quando o ppi final fica abaixo,
+  # útil para peças vistas de perto (banner, móbile, cubo, triedro).
+  ppi:
     pequeno: { minimo: 150, ideal: 200 }   # até ~1 m²: banner, pórtico, móbile, cubo, triedro
     medio:   { minimo: 100, ideal: 150 }   # lonas e adesivo até 4 m
     grande:  { minimo: 72,  ideal: 100 }   # acima de 4 m
@@ -27,6 +32,16 @@ regras:
     duracao_total_s: 10
     loop: 0                       # infinito
     max_bytes: 153600             # 150 KB
+
+# Peças-diretriz: poucas composições de referência, uma por arquétipo. Cada formato do
+# catálogo é derivado da diretriz do seu arquétipo (o Banner L usa a diretriz horizontal).
+diretrizes:
+  ultra-horizontal: lona-800x80
+  horizontal:       lona-420x130
+  quase-quadrado:   banner-100x120
+  vertical:         big-tower
+  ultravertical:    big-tower
+  banner-l:         lona-420x130
 
 grupos:
   pdv:          { secao_apresentacao: PDV }

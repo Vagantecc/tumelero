@@ -4,6 +4,9 @@ import { join } from 'node:path';
 import { Command } from 'commander';
 import {
   ConfigError,
+  addFormat,
+  createCampaign,
+  diretrizFor,
   archetypeFor,
   digitalSwatches,
   loadBrand,
@@ -30,6 +33,10 @@ function run(fn: () => void) {
     if (e instanceof ConfigError) {
       console.error(`✗ ${e.message}`);
       process.exit(2);
+    }
+    if (e instanceof Error) {
+      console.error(`✗ ${e.message}`);
+      process.exit(1);
     }
     throw e;
   }
@@ -71,7 +78,7 @@ program
       const rows = cat.formatos
         .filter((f) => !o.group || f.grupo === o.group)
         .map((f) => {
-          const base = { id: f.id, grupo: f.grupo, medida: sizeLabel(f), arquetipo: archetypeFor(f), app: f.app, cor: f.colorspace };
+          const base = { id: f.id, grupo: f.grupo, medida: sizeLabel(f), arquetipo: archetypeFor(f), diretriz: diretrizFor(f, cat) ?? '-', app: f.app, cor: f.colorspace };
           if (f.unidade === 'px') return { ...base, documento: `${f.medida.w}×${f.medida.h} px @${f.video?.dpi ?? cat.regras.digital.ppi_metadado}ppi`, escala: '1:1', ppi_doc: '-', caixa_alta: '-' };
           const g = printGeometry(f, cat);
           const ppi = requiredPpi(f, cat);
@@ -80,7 +87,7 @@ program
             ...base,
             documento: `${g.docMm.w}×${g.docMm.h} mm +${g.bleedDocMm} sangria`,
             escala: g.scale === 1 ? '1:1' : '1:10',
-            ppi_doc: ppi ? `${ppi.docMin}/${ppi.docIdeal}` : '-',
+            ppi_doc: ppi ? `${ppi.docMin} (final ${ppi.finalMin})${ppi.abaixoReferencia ? ' ⚠' : ''}` : '-',
             caixa_alta: cap ? `${cap.principal} mm` : '-',
           };
         });
@@ -111,6 +118,46 @@ program
         writeFileSync(join(dir, name), buf);
         console.log(`✓ ${join(dir, name)}`);
       }
+    }),
+  );
+
+program
+  .command('formato-novo')
+  .description('cadastra um novo tamanho no catálogo, copiando as especificações de um formato-base')
+  .requiredOption('--base <id>', 'formato existente usado como base (ex.: lona-300x70, ret-medio)')
+  .requiredOption('--nome <texto>', 'nome na apresentação (ex.: "Lona")')
+  .requiredOption('--largura <n>', 'largura no tamanho final (mesma unidade da base: cm ou px)', Number)
+  .requiredOption('--altura <n>', 'altura no tamanho final', Number)
+  .option('--id <id>', 'id do formato (padrão: <base>-<L>x<A>)')
+  .option('--grupo <grupo>', 'grupo/seção (padrão: o da base)')
+  .option('--faces <n>', '1 ou 2 (frente e verso)', (v) => Number(v) as 1 | 2)
+  .action((o: { base: string; nome: string; largura: number; altura: number; id?: string; grupo?: string; faces?: 1 | 2 }) =>
+    run(() => {
+      const p = paths();
+      const f = addFormat(p, { base: o.base, nome_apresentacao: o.nome, w: o.largura, h: o.altura, id: o.id, grupo: o.grupo, faces: o.faces });
+      const cat = loadCatalog(p);
+      const nf = cat.formatos.find((x) => x.id === f.id)!;
+      console.log(`✓ formato "${f.id}" cadastrado: ${sizeLabel(nf)}, ${archetypeFor(nf)}, diretriz ${diretrizFor(nf, cat) ?? '—'}`);
+    }),
+  );
+
+program
+  .command('campanha-nova')
+  .description('cria uma nova campanha (rascunho) em campaigns/<slug>/campaign.yaml')
+  .requiredOption('--nome <texto>', 'nome da campanha (ex.: "Inverno")')
+  .option('--brand <slug>', 'marca', 'tumelero')
+  .option('--slug <slug>', 'identificador (padrão: gerado do nome)')
+  .option('--fases <lista>', 'fases separadas por vírgula (ex.: "lancamento,saldao")')
+  .option('--titulo <texto>', 'título')
+  .option('--subtitulo <texto>', 'subtítulo/conceito')
+  .option('--cta <texto>', 'chamada para ação')
+  .action((o: { nome: string; brand: string; slug?: string; fases?: string; titulo?: string; subtitulo?: string; cta?: string }) =>
+    run(() => {
+      const c = createCampaign(paths(), {
+        nome: o.nome, brand: o.brand, slug: o.slug, phases: o.fases?.split(',').map((x) => x.trim()),
+        titulo: o.titulo, subtitulo: o.subtitulo, cta: o.cta,
+      });
+      console.log(`✓ campanha "${c.slug}" criada (fases: ${c.phases.join(', ')}) → campaigns/${c.slug}/campaign.yaml`);
     }),
   );
 

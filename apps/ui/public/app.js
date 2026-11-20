@@ -1,6 +1,10 @@
 const $ = (s, el = document) => el.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
-const api = async (p) => { const r = await fetch(p); const j = await r.json(); if (!r.ok) throw j; return j; };
+const api = async (p, body) => {
+  const r = await fetch(p, body ? { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) } : undefined);
+  const j = await r.json(); if (!r.ok) throw j; return j;
+};
+const errText = (e) => (e.issues ? e.issues.map((i) => `${i.path}: ${i.message}`).join('\n') : e.erro ?? e.message ?? String(e));
 const state = { campanha: null, filtro: 'todos' };
 
 document.querySelectorAll('nav button').forEach((b) =>
@@ -68,19 +72,59 @@ async function formatos() {
     const n = (s) => rows.filter((r) => r.status === s).length;
     el.innerHTML = `
       <h2>Formatos <span class="tag">${rows.length}</span> <span class="tag ok">${n('rascunho')} com prévia</span> <span class="tag">${n('pendente')} pendentes</span></h2>
+      <div class="card">
+        <h3 style="margin-top:0">Peças-diretriz</h3>
+        <p style="margin:0 0 10px;color:var(--suave);font-size:12px">Poucas composições de referência; cada formato é derivado da diretriz do seu arquétipo.</p>
+        <div class="diretrizes">${[...new Set(rows.map((r) => r.diretriz).filter(Boolean))].map((id) => {
+          const d = rows.find((r) => r.id === id); const filhos = rows.filter((r) => r.diretriz === id && r.id !== id);
+          return `<div><strong>${esc(d?.titulo ?? id)}</strong><small>${esc(d?.arquetipo ?? '')}</small><small>${filhos.length} formatos derivados</small></div>`;
+        }).join('')}</div>
+      </div>
+      <details class="card" id="novo-tamanho">
+        <summary><strong>+ Novo tamanho</strong> <span style="color:var(--suave);font-size:12px">copia as especificações de um formato existente</span></summary>
+        <form class="form" style="margin-top:12px">
+          <div class="linha">
+            <label>Baseado em <select name="base" required>${rows.map((r) => `<option value="${esc(r.id)}"${r.id === state.base ? ' selected' : ''}>${esc(r.titulo)}</option>`).join('')}</select></label>
+            <label>Nome na apresentação <input name="nome_apresentacao" required placeholder="Ex.: Lona" /></label>
+          </div>
+          <div class="linha">
+            <label>Largura <input name="w" type="number" step="any" min="0.1" required /></label>
+            <label>Altura <input name="h" type="number" step="any" min="0.1" required /></label>
+            <label>Unidade <input name="un" disabled /></label>
+            <label>Faces <select name="faces"><option value="">igual à base</option><option value="1">1</option><option value="2">2 (frente e verso)</option></select></label>
+            <label>Id (opcional) <input name="id" placeholder="gerado automaticamente" /></label>
+          </div>
+          <p class="msg"></p>
+          <div class="acoes"><button class="primario">Cadastrar</button></div>
+        </form>
+      </details>
       <div class="filtros">${secoes.map((s) => `<button data-f="${esc(s)}" class="${s === state.filtro ? 'ativo' : ''}">${esc(s)}</button>`).join('')}</div>
       <div class="card" style="padding:0;overflow:auto"><table><thead><tr>
-        <th>Peça</th><th>Arquétipo</th><th>App / cor</th><th>Documento</th><th>Escala</th><th>Sangria</th><th>ppi final (doc)</th><th>Caixa-alta mín.</th><th>Regra</th><th>Prévia</th><th>Status</th>
+        <th>Peça</th><th>Arquétipo / diretriz</th><th>App / cor</th><th>Documento</th><th>Escala</th><th>Sangria</th><th>ppi dos links</th><th>Caixa-alta mín.</th><th>Regra</th><th>Prévia</th><th>Status</th>
       </tr></thead><tbody>${vis.map((r) => `<tr>
         <td><strong>${esc(r.titulo)}</strong><br><span style="font-size:11px;color:var(--suave)">${esc(r.id)} · ${esc(r.saidas.join(', '))}${r.limite ? ' · ≤ ' + esc(r.limite) : ''}${r.faca ? ' · faca ' + esc(r.faca) : ''}</span></td>
-        <td><span class="tag">${esc(r.arquetipo)}</span></td>
+        <td><span class="tag">${esc(r.arquetipo)}</span><br><span style="font-size:11px;color:var(--suave)">${r.e_diretriz ? '<span class="tag azul">diretriz</span>' : '← ' + esc(r.diretriz ?? '—')}</span></td>
         <td>${esc(r.app)} <span class="tag ${r.cor === 'cmyk' ? 'laranja' : 'azul'}">${esc(r.cor.toUpperCase())}</span></td>
-        <td>${esc(r.documento)}</td><td>${esc(r.escala)}</td><td>${esc(r.sangria ?? '—')}</td><td style="font-size:12px">${esc(r.ppi ?? '—')}</td><td>${esc(r.caixa_alta ?? '—')}</td>
+        <td>${esc(r.documento)}</td><td>${esc(r.escala)}</td><td>${esc(r.sangria ?? '—')}</td><td style="font-size:12px">${esc(r.ppi ?? '—')}${r.ppi_alerta ? `<br><span class="tag alerta" title="${esc(r.ppi_alerta)}">ver de perto</span>` : ''}</td><td>${esc(r.caixa_alta ?? '—')}</td>
         <td style="font-size:12px">${esc(r.regra ?? '—')}</td>
         <td>${r.previas.length ? `<img class="prev" src="${r.previas.at(-1)}" data-zoom="${r.previas.at(-1)}" alt="${esc(r.titulo)}">` : '—'}</td>
         <td><span class="tag ${r.status === 'rascunho' ? 'alerta' : ''}">${esc(r.status)}</span></td>
       </tr>`).join('')}</tbody></table></div>`;
     el.querySelectorAll('.filtros button').forEach((b) => b.addEventListener('click', () => { state.filtro = b.dataset.f; formatos(); }));
+    const form = $('#novo-tamanho form', el);
+    const syncUn = () => { const r = rows.find((x) => x.id === form.base.value); form.un.value = r?.unidade ?? ''; };
+    form.base.addEventListener('change', syncUn); syncUn();
+    form.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const msg = $('.msg', form); msg.className = 'msg'; msg.textContent = 'Cadastrando…';
+      const d = Object.fromEntries(new FormData(form));
+      state.base = d.base;
+      try {
+        const r = await api('/api/formatos', { base: d.base, nome_apresentacao: d.nome_apresentacao, w: Number(d.w), h: Number(d.h), faces: d.faces || undefined, id: d.id || undefined });
+        await formatos();
+        const m = $('#novo-tamanho .msg'); $('#novo-tamanho').open = true; m.className = 'msg ok'; m.textContent = `✓ "${r.formato.id}" cadastrado.`;
+      } catch (e) { msg.className = 'msg erro'; msg.textContent = errText(e); }
+    });
   } catch (e) { showError(el, e); }
 }
 
@@ -115,15 +159,32 @@ async function marca() {
   } catch (e) { showError(el, e); }
 }
 
+function novaCampanha() {
+  const d = $('#dlg-campanha'), form = $('#form-campanha'), msg = $('.msg', form);
+  $('#nova-campanha').addEventListener('click', () => { form.reset(); msg.textContent = ''; d.showModal(); });
+  form.addEventListener('submit', async (ev) => {
+    if (ev.submitter?.value !== 'ok') return;
+    ev.preventDefault();
+    msg.className = 'msg'; msg.textContent = 'Criando…';
+    try {
+      const r = await api('/api/campanhas', Object.fromEntries(new FormData(form)));
+      d.close(); await iniciar(r.campanha.slug);
+    } catch (e) { msg.className = 'msg erro'; msg.textContent = errText(e); }
+  });
+}
+
 async function carregar() { await Promise.all([sistema(), formatos(), previas()]); }
 
-(async () => {
+async function iniciar(slug) {
   const sel = $('#campanha');
   const camps = await api('/api/campanhas');
   sel.innerHTML = camps.map((c) => `<option value="${esc(c.slug)}">${esc(c.nome ?? c.slug)}${c.ok ? '' : ' (erro)'}</option>`).join('');
-  state.campanha = camps.find((c) => c.slug === 'verao-2026')?.slug ?? camps[0]?.slug;
+  state.campanha = slug ?? camps.find((c) => c.slug === 'verao-2026')?.slug ?? camps[0]?.slug;
   sel.value = state.campanha;
-  sel.addEventListener('change', () => { state.campanha = sel.value; carregar(); });
-  marca();
   carregar();
-})();
+}
+
+$('#campanha').addEventListener('change', (e) => { state.campanha = e.target.value; carregar(); });
+novaCampanha();
+marca();
+iniciar();

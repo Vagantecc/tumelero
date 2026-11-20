@@ -60,13 +60,49 @@ export function printGeometry(f: Format, c: Catalog): PrintGeometry {
   };
 }
 
-/** ppi efetivo exigido no documento: o InDesign mede no tamanho do doc, a regra vale no final. */
-export function requiredPpi(f: Format, c: Catalog): { finalMin: number; finalIdeal: number; docMin: number; docIdeal: number } | null {
-  if (!f.ppi_tier) return null;
-  const t = c.regras.ppi[f.ppi_tier];
-  if (!t) return null;
+export interface PpiRequirement {
+  docMin: number;
+  docIdeal: number;
+  finalMin: number;
+  finalIdeal: number;
+  /** referência no tamanho final (tier); abaixo dela, em peça vista a < 5 m → ALERTA, não bloqueio */
+  referenciaFinal: { minimo: number; ideal: number } | null;
+  abaixoReferencia: boolean;
+}
+
+/**
+ * ppi efetivo exigido. Com `ppi_documento`, a regra vale NO DOCUMENTO (ex.: 300 ppi em 1:10 =
+ * 30 ppi no final) e o tier final vira só referência para alerta. Sem ela, a regra vale no final.
+ */
+export function requiredPpi(f: Format, c: Catalog): PpiRequirement | null {
+  if (f.unidade === 'px') return null;
   const s = docScale(f, c);
-  return { finalMin: t.minimo, finalIdeal: t.ideal, docMin: t.minimo / s, docIdeal: t.ideal / s };
+  const ref = f.ppi_tier ? (c.regras.ppi[f.ppi_tier] ?? null) : null;
+  const doc = c.regras.ppi_documento;
+  if (doc) {
+    const finalMin = doc.minimo * s;
+    return {
+      docMin: doc.minimo,
+      docIdeal: doc.ideal,
+      finalMin: round(finalMin),
+      finalIdeal: round(doc.ideal * s),
+      referenciaFinal: ref,
+      // só alerta em peças vistas de perto (< 5 m); lonas a 8–15 m aceitam o ppi final baixo
+      abaixoReferencia: ref ? finalMin < ref.minimo && (f.distancia_leitura_m?.max ?? Infinity) < 5 : false,
+    };
+  }
+  if (!ref) return null;
+  return { finalMin: ref.minimo, finalIdeal: ref.ideal, docMin: ref.minimo / s, docIdeal: ref.ideal / s, referenciaFinal: ref, abaixoReferencia: false };
+}
+
+/** Peça-diretriz (formato de referência) da qual o formato é derivado. */
+export function diretrizFor(f: Format, c: Catalog): string | null {
+  return c.diretrizes[archetypeFor(f)] ?? null;
+}
+
+/** Pixels de um link colocado com `placedCm` (tamanho final) para o ppi exigido no DOCUMENTO. */
+export function requiredPixelsDoc(placedCm: { w: number; h: number }, scale: number, docPpi: number): { w: number; h: number } {
+  return requiredPixels({ w: round(placedCm.w * scale), h: round(placedCm.h * scale) }, docPpi);
 }
 
 /** Pixels mínimos/ideais de um link colocado com `placedCm` no tamanho final (para links_faltando.md). */

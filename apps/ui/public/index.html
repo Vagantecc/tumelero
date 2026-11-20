@@ -10,6 +10,7 @@
   <header>
     <div class="brand"><strong>Desdobrador</strong><span>HOC</span></div>
     <label>Campanha <select id="campanha"></select></label>
+    <button id="nova-campanha" class="mais">+ Nova campanha</button>
     <nav>
       <button data-tab="sistema" class="ativo">Sistema visual</button>
       <button data-tab="formatos">Formatos</button>
@@ -23,6 +24,18 @@
     <section id="previas" class="tab"></section>
     <section id="marca" class="tab"></section>
   </main>
+  <dialog id="dlg-campanha">
+    <form method="dialog" id="form-campanha" class="form">
+      <h3>Nova campanha</h3>
+      <label>Nome <input name="nome" required placeholder="Ex.: Inverno" /></label>
+      <label>Fases <input name="fases" placeholder="Ex.: lançamento, saldão (vazio = fase única)" /></label>
+      <label>Título <input name="titulo" placeholder="opcional" /></label>
+      <label>Subtítulo / conceito <input name="subtitulo" placeholder="opcional" /></label>
+      <label>CTA <input name="cta" placeholder="opcional" /></label>
+      <p class="msg"></p>
+      <div class="acoes"><button value="cancel" formnovalidate>Cancelar</button><button value="ok" class="primario">Criar</button></div>
+    </form>
+  </dialog>
   <dialog id="zoom"><img alt="" /><p></p><button onclick="this.closest('dialog').close()">Fechar</button></dialog>
   <script type="module" src="app.js"></script>
 </body>

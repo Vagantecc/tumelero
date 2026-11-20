@@ -3,11 +3,14 @@
  * configurações (marca, catálogo, campanhas), a ingestão do KV e as prévias geradas.
  *   pnpm ui            → http://localhost:5173
  */
-import { createServer, type ServerResponse } from 'node:http';
+import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { extname, join, normalize, relative, sep } from 'node:path';
 import {
   ConfigError,
+  addFormat,
+  createCampaign,
+  diretrizFor,
   archetypeFor,
   compositionRuleFor,
   docScale,
@@ -23,6 +26,7 @@ import {
 } from '@desdobrador/core';
 
 const PORT = Number(process.env.PORT ?? 5173);
+const HOST = process.env.HOST ?? '127.0.0.1'; // só local: a UI grava arquivos de configuração
 const paths = resolvePaths(process.env.DESDOBRADOR_ROOT ?? join(import.meta.dirname, '..', '..', '..'));
 const PUBLIC = join(import.meta.dirname, '..', 'public');
 const MIME: Record<string, string> = {
@@ -108,8 +112,11 @@ function catalogRows(slug?: string) {
       saidas: f.saidas,
       escala: docScale(f, cat) === 1 ? '1:1' : '1:10',
       documento: g ? `${g.docMm.w}×${g.docMm.h} mm` : `${f.medida.w}×${f.medida.h} px`,
-      sangria: g ? `${f.sangria_mm} mm` : null,
-      ppi: ppi ? `${ppi.finalMin}/${ppi.finalIdeal} (doc ${ppi.docMin}/${ppi.docIdeal})` : null,
+      sangria: g ? `${f.sangria_mm} mm (${g.bleedDocMm} no doc)` : null,
+      ppi: ppi ? `${ppi.docMin} no doc (${ppi.finalMin} final)` : null,
+      ppi_alerta: ppi?.abaixoReferencia ? `abaixo da referência final de ${ppi.referenciaFinal?.minimo} ppi` : null,
+      diretriz: diretrizFor(f, cat),
+      e_diretriz: Object.values(cat.diretrizes).includes(f.id),
       caixa_alta: cap ? `${cap.principal} mm` : null,
       limite: f.limite_bytes ? `${Math.round(f.limite_bytes / 1024)} KB` : null,
       faca: f.faca ? (f.faca.tipo === 'gabarito' ? `gabarito ${f.faca.id}` : 'especial') : null,
@@ -119,6 +126,17 @@ function catalogRows(slug?: string) {
     };
   });
 }
+
+async function readBody(req: IncomingMessage): Promise<Record<string, unknown>> {
+  let raw = '';
+  for await (const chunk of req) {
+    raw += chunk;
+    if (raw.length > 100_000) throw new Error('requisição grande demais');
+  }
+  return raw ? JSON.parse(raw) : {};
+}
+
+const str = (v: unknown) => (typeof v === 'string' && v.trim() ? v.trim() : undefined);
 
 function serveFile(res: ServerResponse, base: string, rel: string) {
   const p = normalize(join(base, rel));
@@ -130,10 +148,29 @@ function serveFile(res: ServerResponse, base: string, rel: string) {
   res.end(readFileSync(p));
 }
 
-createServer((req, res) => {
+createServer(async (req, res) => {
   const url = new URL(req.url ?? '/', 'http://localhost');
   const seg = url.pathname.split('/').filter(Boolean).map(decodeURIComponent);
   try {
+    if (seg[0] === 'api' && req.method === 'POST') {
+      const b = await readBody(req);
+      if (seg[1] === 'formatos') {
+        const f = addFormat(paths, {
+          base: String(b.base ?? ''), nome_apresentacao: String(b.nome_apresentacao ?? ''),
+          w: Number(b.w), h: Number(b.h), id: str(b.id), grupo: str(b.grupo),
+          faces: b.faces ? (Number(b.faces) as 1 | 2) : undefined,
+        });
+        return json(res, { ok: true, formato: f }, 201);
+      }
+      if (seg[1] === 'campanhas') {
+        const c = createCampaign(paths, {
+          nome: String(b.nome ?? ''), brand: str(b.brand) ?? 'tumelero', slug: str(b.slug),
+          phases: str(b.fases)?.split(',').map((x) => x.trim()), titulo: str(b.titulo), subtitulo: str(b.subtitulo), cta: str(b.cta),
+        });
+        return json(res, { ok: true, campanha: c }, 201);
+      }
+      return json(res, { erro: 'rota inexistente' }, 404);
+    }
     if (seg[0] === 'api') {
       if (seg[1] === 'campanhas') return json(res, listCampaigns());
       if (seg[1] === 'campanha' && seg[2]) return json(res, campaignDetail(seg[2]));
@@ -147,6 +184,6 @@ createServer((req, res) => {
     }
     return serveFile(res, PUBLIC, seg.length ? seg.join('/') : 'index.html');
   } catch (e) {
-    return json(res, errorBody(e), 500);
+    return json(res, errorBody(e), req.method === 'POST' ? 400 : 500);
   }
-}).listen(PORT, () => console.log(`desdobrador UI → http://localhost:${PORT}`));
+}).listen(PORT, HOST, () => console.log(`desdobrador UI → http://localhost:${PORT}`));

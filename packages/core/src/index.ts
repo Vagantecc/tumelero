@@ -8,3 +8,4 @@ export * from './brand/color.js';
 export * from './brand/logo.js';
 export * from './brand/ase.js';
 export * from './brand/swatches.js';
+export * from './config/write.js';
